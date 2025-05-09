@@ -11,20 +11,21 @@ class CartConroller extends Controller
     public function add(Request $request){
         try {
             $id = $request->product_id;
-            $product = Product::findOrFail($id);
+            $product = Product::where('id',$id)->first();
             if(!empty($product)){
                 $cart = session()->get('cart', []);
-        
-                /* For multiple products add in cart with quantity 1 */
+    
                 $cart[$product->id] = [
                     "name" => $product->name,
                     "price" => $product->price,
                     "quantity" => 1,
                     "image" => $product->image
                 ];
-               
                 session()->put('cart', $cart);
-                return response()->json(['message' => 'Product added to cart.']);
+                $cart = session()->get('cart', []);
+                return response()->json([
+                    'cart_html' => view('partials.view-cart',compact('cart'))->render()
+                ]);
             }else{
                 return response()->json(['message' => 'Something went wrong.']);
             }
@@ -41,8 +42,15 @@ class CartConroller extends Controller
         if (isset($cart[$productId])) {
             unset($cart[$productId]); 
             session()->put('cart', $cart); 
+            // $cartHtml = view('partials.view-cart')->render();
+            // return response()->json(['cart_html' => $cartHtml]);
 
-            return response()->json(['message' => 'Product removed from cart.']);
+            return response()->json([
+                // 'status' =>true,
+                // 'current_page' => $data['current_page'],
+                // 'has_more'=>$data['has_more'],
+                'cart_html' => view('partials.view-cart',compact('cart'))->render()
+            ]);
         }
 
         return response()->json(['message' => 'Product not found in cart.']);

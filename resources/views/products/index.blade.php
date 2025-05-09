@@ -19,32 +19,36 @@
         </div>
     </div>
     <div class="row g-4">
-        
-        @include('view-cart')
 
-        <div id="cd-cart">
-            <h2>Cart</h2>
-            <ul class="cd-cart-items">
-                @forelse (session('cart') as $key=>$cart )
-                <li>
-                    <span class="cd-qty">1x</span> {{ $cart['name'] }}
-                    <div class="cd-price">{{ $cart['price']}}<div>
-                    <a href="#0" class="cd-item-remove cd-img-replace" data-id="{{ $key }}">Remove</a>
-                </li>
-                @empty
-                    <div>No items have been added to cart.</div>
-                @endforelse
-                
-            </ul> <!-- cd-cart-items -->
+            @foreach($products as $product)
+            <div class="col-md-4">
+                <div class="card">
+                    <img  src="{{ asset('uploads/' . $product->image) }}" class="card-img-top" alt="Product Image">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ $product->name }}</h5>
+                        <p class="card-text">{{ $product->short_description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">${{ number_format($product->price, 2) }}</span>
+                        </div>
+                    </div>
+
+
+                    <div class="card-footer d-flex justify-content-between bg-light">
+                        @php
+                            $cart = session('cart', []);
+                            $inCart = isset($cart[$product->id]) && $cart[$product->id] > 0;
+                        @endphp
+                        <input type="checkbox" class="form-control add_to_cart" data-id="{{ $product->id }}" {{ $inCart ? 'checked disabled' : '' }}>
+                    </div>
+                </div>
+            </div>
+        @endforeach
         
-            <div class="cd-cart-total">
-                <p>Total <span></span></p>
-            </div> <!-- cd-cart-total -->
-        
-            {{-- <a href="#0" class="checkout-btn">Checkout</a> --}}
-            
-            {{-- <p class="cd-go-to-cart"><a href="#0">Go to cart page</a></p> --}}
-        </div> <!-- cd-cart -->
+        <div class="cart-items-container" id="cd-shadow-layer">
+            @include('partials.view-cart')
+        </div>
+
+       
     </div>
     
 </div>
@@ -69,6 +73,7 @@
 <script>
     let cart_add = "{{ route('cart.add') }}";
     let cart_remove = "{{ route('cart.remove') }}";
+    let order_store = "{{ route('checkout.submit') }}";
 </script>
 <script src="{{ asset('scripts/index.js') }}"></script>
     
